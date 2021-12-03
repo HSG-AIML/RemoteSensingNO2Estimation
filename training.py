@@ -31,8 +31,9 @@ import random
 import mlflow
 
 # parameters
-samples_file = "data/samples_S2S5P_monthly.csv"
-datadir = "/netscratch/lscheibenreif/eea"
+samples_file = "data/samples_S2S5P_whole_timespan.csv"
+# datadir = "/netscratch/lscheibenreif/eea"
+datadir = "/ds2/remote_sensing/eea/whole-timespan"
 verbose = True
 sources = samples_file.split("_")[1]
 frequency = "whole_timespan" if "whole_timespan" in samples_file else samples_file.split("_")[2].replace(".csv", "")
@@ -49,7 +50,8 @@ checkpoint_name = "pretrained" if checkpoint is not None else "from_scratch"
 
 experiment = "_".join([sources, checkpoint_name, frequency])
 if verbose: print("Init. mlflow experiment:", experiment)
-#mlflow.create_experiment(experiment)
+
+# mlflow.create_experiment(experiment)
 
 if verbose:
     print(samples_file)
@@ -90,7 +92,9 @@ for run in tqdm(range(1, runs+1), unit="run"):
 
         # initialize dataloaders + model
         if verbose: print("Initializing dataset")
+
         samples_train, samples_val, samples_test = split_samples(samples, list(stations.keys()), 0.2, 0.2)
+
         dataset_test = NO2PredictionDataset(datadir, samples_test, frequency, sources, transforms=tf, station_imgs=stations)
         dataset_train = NO2PredictionDataset(datadir, samples_train, frequency, sources, transforms=tf, station_imgs=stations)
         dataset_val = NO2PredictionDataset(datadir, samples_val, frequency, sources, transforms=tf, station_imgs=stations)

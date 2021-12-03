@@ -84,7 +84,6 @@ def load_data(datadir, samples_file, frequency, sources):
 
     return samples, stations
 
-
 def load_s5p_to_memory(sample, datadir, frequency, sources, s5p_dates):
     if sample.get("s5p") is None and "S5P" in sources:
         s5p_data = xr.open_dataset(os.path.join(datadir, "sentinel-5p", sample["s5p_path"])).rio.write_crs(4326)
@@ -98,7 +97,7 @@ def load_s5p_to_memory(sample, datadir, frequency, sources, s5p_dates):
         s5p_data.close()
     return sample
 
-def load_data_light(datadir, samples_file, frequency, sources):
+def load_data_light(datadir, samples_file, frequency, sources, n=None):
     """load samples to memory, returns array of samples and array of stations
     each sample is a dict"""
     assert(sources in ["S2", "S2S5P"])
@@ -130,5 +129,10 @@ def load_data_light(datadir, samples_file, frequency, sources):
         sample = load_s5p_to_memory(sample, datadir, frequency, sources, s5p_dates)
         samples.append(sample)
         stations[sample["AirQualityStation"]] = np.load(os.path.join(datadir, "sentinel-2", sample["img_path"]))
+
+        if n is not None:
+            # optionally break dataloading early (for quick debugging)
+            if idx == n:
+                break
 
     return samples, stations
